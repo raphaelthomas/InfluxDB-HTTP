@@ -10,20 +10,38 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = ();
 our @EXPORT    = ();
 
+use LWP::UserAgent;
+
 
 our $VERSION = '0.01';
 
 
 sub new {
+    my $class = shift;
 
+    my $self  = {};
+
+    $self->{lwp_user_agent} = LWP::UserAgent->new();
+    $self->{lwp_user_agent}->agent(__PACKAGE__."/$VERSION");
+
+    bless $self, $class;
+
+    return $self;
 }
 
 sub get_lwp_useragent {
+    my $self = shift;
 
+    return $self->{lwp_user_agent};
 }
 
 sub ping {
+    my $self = shift;
 
+    my $response = $self->{lwp_user_agent}->head('http://localhost:8086/ping');
+
+    return unless ($response->is_success());
+    return $response->header('X-Influxdb-Version');
 }
 
 sub query {
@@ -33,6 +51,7 @@ sub query {
 sub write {
 
 }
+
 
 1;
 
