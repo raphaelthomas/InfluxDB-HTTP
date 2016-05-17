@@ -1,6 +1,5 @@
-Revision history for Perl extension InfluxDB::HTTP.
+Revision history for InfluxDB-HTTP
 
-0.01  Mon May 16 21:34:14 2016
-	- original version; created by h2xs 1.23 with options
-		-AX -n InfluxDB::HTTP
+0.01    Date/time
+        First version, released on an unsuspecting world.
 
