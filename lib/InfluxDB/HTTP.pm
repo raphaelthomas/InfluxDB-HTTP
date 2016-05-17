@@ -12,6 +12,7 @@ our @EXPORT    = ();
 
 use LWP::UserAgent;
 use Method::Signatures;
+use Object::Result;
 
 
 our $VERSION = '0.01';
@@ -38,8 +39,21 @@ method get_lwp_useragent {
 method ping {
     my $response = $self->{lwp_user_agent}->head('http://'.$self->{host}.':'.$self->{port}.'/ping');
 
-    return unless ($response->is_success());
-    return $response->header('X-Influxdb-Version');
+    if (! $response->is_success()) {
+        my $error = $response->message();
+        result {
+                error  { return $error; }
+                <STR>  { return "Error pinging InfluxDB: $error"; }
+                <BOOL> { return; }
+        }
+    }
+
+    my $version = $response->header('X-Influxdb-Version');
+    result {
+            version { return $version; }
+            <STR>   { return "Ping successful: InfluxDB version $version"; }
+            <BOOL>  { return 1; }
+    }
 }
 
 method query {
