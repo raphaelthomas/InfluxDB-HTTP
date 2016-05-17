@@ -1,3 +1,5 @@
+# FIXME authentication support
+
 package InfluxDB::HTTP;
 
 use strict;
@@ -10,6 +12,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = ();
 our @EXPORT    = ();
 
+use JSON::XS;
 use LWP::UserAgent;
 use Method::Signatures;
 use Object::Result;
@@ -56,8 +59,30 @@ method ping {
     }
 }
 
-method query {
+method query (Str|ArrayRef[Str] $query!, Str :$database = '', Int :$chunk_size, Str :$epoch where qr/(h|m|s|ms|u|ns)/) {
 
+    # support chunk_size
+    # support query being an arrayref
+
+    my $response = $self->{lwp_user_agent}->post('http://'.$self->{host}.':'.$self->{port}."/query?q=$query&db=$database&epoch=$epoch");
+
+    if (($response->code() != 200) || ($response->header('Content-Type') ne 'application/json')) {
+        my $error = $response->message();
+        result {
+            error  { return $error; }
+            <STR>  { return "Error executing query: $error"; }
+            <BOOL> { return; }
+        }
+    }
+
+    my $data = decode_json($response->content);
+
+    result {
+        data        { return $data; }
+        results     { return $data->{results}; }
+        request_id  { return $response->header('Request-Id'); }
+        <BOOL>      { return 1; }
+    }
 }
 
 method write {
