@@ -11,44 +11,42 @@ our @EXPORT_OK = ();
 our @EXPORT    = ();
 
 use LWP::UserAgent;
+use Method::Signatures;
 
 
 our $VERSION = '0.01';
 
 
-sub new {
-    my $class = shift;
-
-    my $self  = {};
+method new ($class: Str :$host = 'localhost', Int :$port = 8086) {
+    my $self = {
+        host => $host,
+        port => $port,
+    };
 
     $self->{lwp_user_agent} = LWP::UserAgent->new();
-    $self->{lwp_user_agent}->agent(__PACKAGE__."/$VERSION");
+    $self->{lwp_user_agent}->agent("InfluxDB-HTTP/$VERSION");
 
     bless $self, $class;
 
     return $self;
 }
 
-sub get_lwp_useragent {
-    my $self = shift;
-
+method get_lwp_useragent {
     return $self->{lwp_user_agent};
 }
 
-sub ping {
-    my $self = shift;
-
-    my $response = $self->{lwp_user_agent}->head('http://localhost:8086/ping');
+method ping {
+    my $response = $self->{lwp_user_agent}->head('http://'.$self->{host}.':'.$self->{port}.'/ping');
 
     return unless ($response->is_success());
     return $response->header('X-Influxdb-Version');
 }
 
-sub query {
+method query {
 
 }
 
-sub write {
+method write {
 
 }
 
