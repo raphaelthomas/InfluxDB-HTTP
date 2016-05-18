@@ -16,6 +16,7 @@ use JSON::XS;
 use LWP::UserAgent;
 use Method::Signatures;
 use Object::Result;
+use URI;
 
 
 our $VERSION = '0.01';
@@ -59,12 +60,25 @@ method ping {
     }
 }
 
-method query (Str|ArrayRef[Str] $query!, Str :$database = '', Int :$chunk_size, Str :$epoch where qr/(h|m|s|ms|u|ns)/) {
+method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :$epoch where qr/(h|m|s|ms|u|ns)/ = 'ns') {
+    if (ref($query) eq 'ARRAY') {
+        $query = join(';', @$query);
+    }
 
-    # support chunk_size
-    # support query being an arrayref
+    my $uri = URI->new();
+    $uri->scheme('http');
+    $uri->host($self->{host});
+    $uri->port($self->{port});
+    $uri->path('query');
 
-    my $response = $self->{lwp_user_agent}->post('http://'.$self->{host}.':'.$self->{port}."/query?q=$query&db=$database&epoch=$epoch");
+    my $uri_query = {'q' => $query, };
+    $uri_query->{'db'} = $database if (defined $database);
+    $uri_query->{'chunk_size'} = $chunk_size if (defined $chunk_size);
+    $uri_query->{'epoch'} = $epoch if (defined $epoch);
+
+    $uri->query_form($uri_query);
+
+    my $response = $self->{lwp_user_agent}->post($uri->canonical());
 
     if (($response->code() != 200) || ($response->header('Content-Type') ne 'application/json')) {
         my $error = $response->message();
