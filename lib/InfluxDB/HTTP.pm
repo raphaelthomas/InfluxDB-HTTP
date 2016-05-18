@@ -111,49 +111,90 @@ __END__
 
 =head1 NAME
 
-InfluxDB::HTTP - Perl extension for blah blah blah
+InfluxDB::HTTP - The Perl way to interact with InfluxDB!
+
+=head1 VERSION
+
+Version 0.01
 
 =head1 SYNOPSIS
 
-  use InfluxDB::HTTP;
-  blah blah blah
+Quick summary of what the module does. Perhaps a little code snippet.
 
-=head1 DESCRIPTION
+    use InfluxDB::HTTP;
 
-Stub documentation for InfluxDB::HTTP, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+    my $influx = InfluxDB::HTTP->new();
 
-Blah blah blah.
+    my $ping_result = $influx->ping();
+    print "$ping_result\n";
 
-=head2 EXPORT
+    my $query = $influx->query(
+        [ 'SELECT Lookups FROM _internal.monitor.runtime WHERE time > '.(time - 60)*1000000000, 'SHOW DATABASES'],
+        epoch => 's',
+    );
 
-None by default.
+    print "$query\n";
 
 
+=head1 SUBROUTINES/METHODS
 
-=head1 SEE ALSO
+=head2 ping
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
+=head2 query
 
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+=head2 write
 
 =head1 AUTHOR
 
-Raphael Seebacher, E<lt>rse@apple.comE<gt>
+Raphael Seebacher, C<< <raphael at seebachers.ch> >>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 BUGS
 
-Copyright (C) 2016 by Raphael Seebacher
+Please report any bugs or feature requests to C<bug-influxdb-http at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=InfluxDB-HTTP>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.18.2 or,
-at your option, any later version of Perl 5 you may have available.
+=head1 SUPPORT
 
+You can find documentation for this module with the perldoc command.
+
+    perldoc InfluxDB::HTTP::Write
+
+
+    You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker (report bugs here)
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=InfluxDB-HTTP>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/InfluxDB-HTTP>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/InfluxDB-HTTP>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/InfluxDB-HTTP/>
+
+=back
+
+
+=head1 ACKNOWLEDGEMENTS
+
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2016 Raphael Seebacher.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
