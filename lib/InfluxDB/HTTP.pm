@@ -41,6 +41,7 @@ method get_lwp_useragent {
 }
 
 method ping {
+    # FIXME move this to the _get_influxdb_http_api_uri subroutine
     my $response = $self->{lwp_user_agent}->head('http://'.$self->{host}.':'.$self->{port}.'/ping');
 
     if (! $response->is_success()) {
@@ -51,6 +52,8 @@ method ping {
                 <BOOL> { return; }
         }
     }
+
+    # FIXME handle case when 200 OK is returned (which indicates a failure according to the Docs, or is this just for /write?)
 
     my $version = $response->header('X-Influxdb-Version');
     result {
@@ -65,12 +68,9 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
         $query = join(';', @$query);
     }
 
-    my $uri = URI->new();
-    $uri->scheme('http');
-    $uri->host($self->{host});
-    $uri->port($self->{port});
-    $uri->path('query');
+    my $uri = $self->_get_influxdb_http_api_uri('query');
 
+    # FIXME move this query handling to _get_influxdb_http_api_uri subroutine
     my $uri_query = {'q' => $query, };
     $uri_query->{'db'} = $database if (defined $database);
     $uri_query->{'chunk_size'} = $chunk_size if (defined $chunk_size);
@@ -80,7 +80,7 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
 
     my $response = $self->{lwp_user_agent}->post($uri->canonical());
 
-    if (($response->code() != 200) || ($response->header('Content-Type') ne 'application/json')) {
+    if (! $response->is_success()) {
         my $error = $response->message();
         result {
             error  { return $error; }
@@ -89,18 +89,50 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
         }
     }
 
-    my $data = decode_json($response->content);
+    my $data = decode_json($response->content());
 
     result {
         data        { return $data; }
         results     { return $data->{results}; }
         request_id  { return $response->header('Request-Id'); }
+        <STR>       { return 'Returned data: '.$response->content(); }
         <BOOL>      { return 1; }
     }
 }
 
-method write {
+method write (Str|ArrayRef[Str] $data_lineprotocol!, Str :$database) {
+    if (ref($data_lineprotocol) eq 'ARRAY') {
+        $data_lineprotocol = join("\n", @$data_lineprotocol);
+    }
 
+    my $uri = $self->_get_influxdb_http_api_uri('write');
+    $uri->query_form(db => $database) if (defined $database);
+
+    my $response = $self->{lwp_user_agent}->post($uri->canonical(), Content => $data_lineprotocol);
+
+    if ($response->code() != 204) {
+        my $error = $response->message();
+        result {
+            error  { return $error; }
+            <STR>  { return "Error executing write $error"; }
+            <BOOL> { return; }
+        }
+    }
+
+    result {
+        <BOOL>      { return 1; }
+    }
+}
+
+method _get_influxdb_http_api_uri (Str $endpoint!) {
+    my $uri = URI->new();
+
+    $uri->scheme('http');
+    $uri->host($self->{host});
+    $uri->port($self->{port});
+    $uri->path($endpoint);
+
+    return $uri;
 }
 
 
