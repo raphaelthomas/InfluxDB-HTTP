@@ -16,9 +16,7 @@ use Method::Signatures;
 use Object::Result;
 use URI;
 
-
 our $VERSION = '0.01';
-
 
 method new ($class: Str :$host = 'localhost', Int :$port = 8086) {
     my $self = {
@@ -39,8 +37,8 @@ method get_lwp_useragent {
 }
 
 method ping {
-    # FIXME move this to the _get_influxdb_http_api_uri subroutine
-    my $response = $self->{lwp_user_agent}->head('http://'.$self->{host}.':'.$self->{port}.'/ping');
+    my $uri = $self->_get_influxdb_http_api_uri('ping');
+    my $response = $self->{lwp_user_agent}->head($uri->canonical());
 
     if (! $response->is_success()) {
         my $error = $response->message();
@@ -50,8 +48,6 @@ method ping {
                 <BOOL> { return; }
         }
     }
-
-    # FIXME handle case when 200 OK is returned (which indicates a failure according to the Docs, or is this just for /write?)
 
     my $version = $response->header('X-Influxdb-Version');
     result {
@@ -73,7 +69,6 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
     $uri_query->{'db'} = $database if (defined $database);
     $uri_query->{'chunk_size'} = $chunk_size if (defined $chunk_size);
     $uri_query->{'epoch'} = $epoch if (defined $epoch);
-
     $uri->query_form($uri_query);
 
     my $response = $self->{lwp_user_agent}->post($uri->canonical());
