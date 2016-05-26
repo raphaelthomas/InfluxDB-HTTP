@@ -1,6 +1,4 @@
 Changes
 lib/InfluxDB/HTTP.pm
-lib/InfluxDB/HTTP/Query.pm
-lib/InfluxDB/HTTP/Write.pm
 Makefile.PL
 MANIFEST			This list of files
