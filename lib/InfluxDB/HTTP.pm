@@ -143,7 +143,8 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does. Perhaps a little code snippet.
+InfluxDB::HTTP allows you top interact with the InfluxDB HTTP API. The module essentially provides
+one method per InfluxDB HTTP API endpoint, that is C<ping>, C<write> and C<query>.
 
     use InfluxDB::HTTP;
 
@@ -162,11 +163,62 @@ Quick summary of what the module does. Perhaps a little code snippet.
 
 =head1 SUBROUTINES/METHODS
 
+=head2 RETURN VALUES AND ERROR HANDLING
+
+C<Object::Result> is relied upon for returning data from subroutines. The respective result
+object can always be used as string and evaluated on a boolean basis. A result object
+evaluating to false indicates an error and a corresponding error message is provided in the
+attribute C<error>:
+
+    my $ping = $influx->ping();
+    print $ping->error unless ($ping);
+
+=head2 new host => 'localhost', port => 8086
+
+Passing C<host> and/or C<port> is optional, defaulting to the InfluxDB defaults.
+
+Returns an instance of InfluxDB::HTTP.
+
 =head2 ping
 
-=head2 query
+Pings the InfluxDB instance configured in the constructor (i.e. by C<host> and C<port>).
 
-=head2 write
+Returned object evaluates to true or false depending on whether the ping was successful or not.
+If true, then it contains a C<version> attribute that indicates the InfluxDB version running on
+the pinged server.
+
+The C<version> attribute is extracted from the C<X-Influxdb-Version> HTTP response header, which
+is part of the HTTP response from the pinged InfluxDB instance.
+
+    my $ping = $influx->ping();
+    print $ping->version if ($ping);
+
+=head2 query query, database => "DATABASE", chunk_size => CHUNK_SIZE, epoch => "ns"
+
+Used to query the InfluxDB instance. All parameters but the first one are optional. The
+C<query> parameter can either be a String or a Perl ArrayRef of Strings, where every String
+contains a valid InfluxDB query.
+
+If the returned object evaluates to true, indicating that the query was successful, then
+the returned object's C<data> attribute contains the entire response from InfluxDB as Perl
+hash. Additionally the attribute C<request_id> provides the request identifier as set in
+the HTTP reponse headers by InfluxDB. This can for example be useful for correlating
+requests with log files.
+
+=head2 write measurement, database => "DATABASE"
+
+Writes data into InfluxDB. The parameter C<measurement> can either be a String or an
+ArrayRef of Strings, where each String contains one valid InfluxDB LineProtocol
+statement. All of those mesaurements are then sent to InfluxDB and the specified
+database.
+
+The returned object evaluates to true if the write was successful, and otherwise to
+false.
+
+=head2 get_lwp_useragent
+
+Returns the internally used LWP::UserAgent instance for possible modifications
+(e.g. to configure an HTTP proxy).
 
 =head1 AUTHOR
 
@@ -174,42 +226,8 @@ Raphael Seebacher, C<< <raphael at seebachers.ch> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-influxdb-http at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=InfluxDB-HTTP>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc InfluxDB::HTTP::Write
-
-
-    You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=InfluxDB-HTTP>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/InfluxDB-HTTP>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/InfluxDB-HTTP>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/InfluxDB-HTTP/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
+Please report any bugs or feature requests to
+L<https://github.com/raphaelthomas/InfluxDB-HTTP/issues>.
 
 =head1 LICENSE AND COPYRIGHT
 
