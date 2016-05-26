@@ -93,15 +93,15 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
     }
 }
 
-method write (Str|ArrayRef[Str] $data_lineprotocol!, Str :$database) {
-    if (ref($data_lineprotocol) eq 'ARRAY') {
-        $data_lineprotocol = join("\n", @$data_lineprotocol);
+method write (Str|ArrayRef[Str] $measurement!, Str :$database) {
+    if (ref($measurement) eq 'ARRAY') {
+        $measurement = join("\n", @$measurement);
     }
 
     my $uri = $self->_get_influxdb_http_api_uri('write');
     $uri->query_form(db => $database) if (defined $database);
 
-    my $response = $self->{lwp_user_agent}->post($uri->canonical(), Content => $data_lineprotocol);
+    my $response = $self->{lwp_user_agent}->post($uri->canonical(), Content => $measurement);
 
     if ($response->code() != 204) {
         my $error = $response->message();
@@ -129,9 +129,7 @@ method _get_influxdb_http_api_uri (Str $endpoint!) {
     return $uri;
 }
 
-
 1;
-
 
 __END__
 
