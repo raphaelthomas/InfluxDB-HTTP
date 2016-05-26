@@ -1,5 +1,3 @@
-# FIXME authentication support
-
 package InfluxDB::HTTP;
 
 use strict;
@@ -120,7 +118,8 @@ method write (Str|ArrayRef[Str] $data_lineprotocol!, Str :$database) {
     }
 
     result {
-        <BOOL>      { return 1; }
+        <STR>  { return "Write successful"; }
+        <BOOL> { return 1; }
     }
 }
 
