@@ -10,7 +10,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = ();
 our @EXPORT    = ();
 
-use JSON::XS;
+use JSON::MaybeXS;
 use LWP::UserAgent;
 use Method::Signatures;
 use Object::Result;
