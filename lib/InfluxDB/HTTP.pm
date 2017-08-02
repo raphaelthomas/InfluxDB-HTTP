@@ -75,24 +75,25 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
 
     my $response = $self->{lwp_user_agent}->post($uri->canonical());
 
+    chomp(my $content = $response->content());
+
+    my $data = decode_json($content);
+
     if (! $response->is_success()) {
-        my $error = $response->message();
         result {
             raw    { return $response; }
-            error  { return $error; }
-            <STR>  { return "Error executing query: $error"; }
+            error  { return $data; }
+            <STR>  { return "Error executing query: $data->{error}"; }
             <BOOL> { return; }
         }
     }
-
-    my $data = decode_json($response->content());
 
     result {
         raw         { return $response; }
         data        { return $data; }
         results     { return $data->{results}; }
         request_id  { return $response->header('Request-Id'); }
-        <STR>       { return 'Returned data: '.$response->content(); }
+        <STR>       { return "Returned data: $content"; }
         <BOOL>      { return 1; }
     }
 }
@@ -112,13 +113,15 @@ method write (Str|ArrayRef[Str] $measurement!, Str :$database!, :$precision wher
 
     my $response = $self->{lwp_user_agent}->post($uri->canonical(), Content => $measurement);
 
+    chomp(my $content = $response->content());
+
     if ($response->code() != 204) {
-        my $error = $response->message();
+        my $data = decode_json($content);
 
         result {
             raw    { return $response; }
-            error  { return $error; }
-            <STR>  { return "Error executing write $error"; }
+            error  { return $data; }
+            <STR>  { return "Error executing write: $data->{error}"; }
             <BOOL> { return; }
         }
     }
