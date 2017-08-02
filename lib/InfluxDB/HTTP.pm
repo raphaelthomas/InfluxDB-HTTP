@@ -43,6 +43,7 @@ method ping {
     if (! $response->is_success()) {
         my $error = $response->message();
         result {
+                raw    { return $response; }
                 error  { return $error; }
                 <STR>  { return "Error pinging InfluxDB: $error"; }
                 <BOOL> { return; }
@@ -51,6 +52,7 @@ method ping {
 
     my $version = $response->header('X-Influxdb-Version');
     result {
+            raw     { return $response; }
             version { return $version; }
             <STR>   { return "Ping successful: InfluxDB version $version"; }
             <BOOL>  { return 1; }
@@ -76,6 +78,7 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
     if (! $response->is_success()) {
         my $error = $response->message();
         result {
+            raw    { return $response; }
             error  { return $error; }
             <STR>  { return "Error executing query: $error"; }
             <BOOL> { return; }
@@ -85,6 +88,7 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
     my $data = decode_json($response->content());
 
     result {
+        raw         { return $response; }
         data        { return $data; }
         results     { return $data->{results}; }
         request_id  { return $response->header('Request-Id'); }
@@ -110,7 +114,9 @@ method write (Str|ArrayRef[Str] $measurement!, Str :$database!, :$precision wher
 
     if ($response->code() != 204) {
         my $error = $response->message();
+
         result {
+            raw    { return $response; }
             error  { return $error; }
             <STR>  { return "Error executing write $error"; }
             <BOOL> { return; }
@@ -118,6 +124,7 @@ method write (Str|ArrayRef[Str] $measurement!, Str :$database!, :$precision wher
     }
 
     result {
+        raw    { return $response; }
         <STR>  { return "Write successful"; }
         <BOOL> { return 1; }
     }
@@ -177,6 +184,9 @@ attribute C<error>:
 
     my $ping = $influx->ping();
     print $ping->error unless ($ping);
+
+Furthermore, all result objects provide access to the C<HTTP::Response> object that is returned
+by InfluxDB in the attribute C<raw>.
 
 =head2 new host => 'localhost', port => 8086
 
