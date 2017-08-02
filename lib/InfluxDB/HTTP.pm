@@ -16,7 +16,7 @@ use Method::Signatures;
 use Object::Result;
 use URI;
 
-our $VERSION = '0.01.1';
+our $VERSION = '0.02';
 
 method new ($class: Str :$host = 'localhost', Int :$port = 8086) {
     my $self = {
@@ -151,7 +151,7 @@ InfluxDB::HTTP - The Perl way to interact with InfluxDB!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
