@@ -220,19 +220,20 @@ hash. Additionally the attribute C<request_id> provides the request identifier a
 the HTTP reponse headers by InfluxDB. This can for example be useful for correlating
 requests with log files.
 
-=head2 write measurement, database => "DATABASE", precision => "ns"
+=head2 write measurement, database => "DATABASE", precision => "ns", retention_policy => "RP"
 
 Writes data into InfluxDB. The parameter C<measurement> can either be a String or an
 ArrayRef of Strings, where each String contains one valid InfluxDB LineProtocol
 statement. All of those mesaurements are then sent to InfluxDB and the specified
-database.
-
-The returned object evaluates to true if the write was successful, and otherwise to
-false.
+database. The returned object evaluates to true if the write was successful, and otherwise
+to false.
 
 The optional argument precision can be given if a precsion different than "ns" is used in
 the line protocol. InfluxDB docs suggest that using a coarser precision than ns can save
 space and processing. In many cases "s" or "m" might do.
+
+The optional argument retention_policy can be used to specify a retention policy other than
+the default retention policy of the selected database.
 
 =head2 get_lwp_useragent
 
