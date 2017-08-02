@@ -93,30 +93,18 @@ method query (Str|ArrayRef[Str] $query!, Str :$database, Int :$chunk_size, Str :
     }
 }
 
-method write (Str|ArrayRef[Str] $measurement!, Str :$database, Str :$precision) {
+method write (Str|ArrayRef[Str] $measurement!, Str :$database!, :$precision where { (!$_) || ($_ =~ /^(h|m|s|ms|u|ns)$/) }, Str :$retention_policy) {
     if (ref($measurement) eq 'ARRAY') {
         $measurement = join("\n", @$measurement);
     }
 
-    my %form = ();
-
     my $uri = $self->_get_influxdb_http_api_uri('write');
-    $form{db} = $database if (defined $database);
 
-    if (defined $precision) {
-        if ( ! $precision =~ /^(h|m|s|ms|u|ns)$/ ) {
-            # I could not see how to enforce a constraint on a
-            # optional parameter, was only getting "In call to
-            # InfluxDB::HTTP::write(), $precision value (undef) does
-            # not satisfy constraint: qr/(h|m|s|ms|u|ns)/ at ..."
-            #
-            # So this kluge instead. - Nicolai
-            die "Unrecognized precision: ".$precision);
-        }
-        $form{precision} = $precision;
-    }
-
-    $uri->query_form(%form) if (scalar %form);
+    $uri->query_form(
+        db => $database,
+        ($precision ? (precision => $precision) : ()),
+        ($retention_policy ? (rp => $retention_policy) : ())
+    );
 
     my $response = $self->{lwp_user_agent}->post($uri->canonical(), Content => $measurement);
 
@@ -232,7 +220,9 @@ database.
 The returned object evaluates to true if the write was successful, and otherwise to
 false.
 
-The optional argument precision can be given if a precsion different than "ns" is used in the line protocol.  InfluxDB docs suggest that using a coarser precision than ns can save space and processing. In many cases "s" or "m" might do.
+The optional argument precision can be given if a precsion different than "ns" is used in
+the line protocol. InfluxDB docs suggest that using a coarser precision than ns can save
+space and processing. In many cases "s" or "m" might do.
 
 =head2 get_lwp_useragent
 

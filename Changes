@@ -1,7 +1,8 @@
 Revision history for InfluxDB-HTTP
 
-0.01.1  2017-01-03
-        Write now supports precision= parameter (nicolai.langfeldt@broadnet.no)
+0.02    UNRELEASED
+        Support precision= parameter in write (nicolai.langfeldt@broadnet.no).
+        Support retention_policy parameter in write.
 
 0.01    2016-05-27
         First version, released on an unsuspecting world. Still some rough edges.
