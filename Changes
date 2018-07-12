@@ -1,4 +1,12 @@
 Revision history for InfluxDB-HTTP
 
+0.03    2018-07-12
+        - Improved JSON error handling and configurable LWP UserAgent timeout (kb@open.ch).
+
+0.02    2017-08-02
+        - Support precision= parameter in write (nicolai.langfeldt@broadnet.no).
+        - Support retention_policy parameter in write.
+        - Expose HTTP::Response in returned results.
+
 0.01    2016-05-27
-        First version, released on an unsuspecting world. Still some rough edges.
+        - First version, released on an unsuspecting world. Still some rough edges.
