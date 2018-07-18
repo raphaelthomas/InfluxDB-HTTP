@@ -15,7 +15,7 @@ use LWP::UserAgent;
 use Object::Result;
 use URI;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
     my $class = shift;
@@ -202,7 +202,7 @@ InfluxDB::HTTP - The Perl way to interact with InfluxDB!
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =head1 SYNOPSIS
 
