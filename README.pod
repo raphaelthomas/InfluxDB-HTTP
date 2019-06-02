@@ -41,14 +41,15 @@ attribute C<error>:
 Furthermore, all result objects provide access to the C<HTTP::Response> object that is returned
 by InfluxDB in the attribute C<raw>.
 
-=head2 new host => 'localhost', port => 8086, timeout => 600
+=head2 new(host=>'localhost', port=>8086, username=>'zutana', password=>'se¢retØ', ssl=>1, ssl_verify=>0, ssl_opts=>{}, timeout=>600)
 
-Passing C<host>, C<port> and/or C<timeout> is optional, defaulting to the InfluxDB defaults or
-to 3 minutes for the timeout. The timeout is in seconds.
+Passing C<host>, C<port>, C<username>, C<password>, C<ssl>, C<ssl_verify>, C<ssl_opts>, and/or 
+C<timeout> is optional, defaulting to the InfluxDB defaults or to 3 minutes for the timeout. 
+The timeout is in seconds.
 
 Returns an instance of InfluxDB::HTTP.
 
-=head2 ping
+=head2 ping()
 
 Pings the InfluxDB instance configured in the constructor (i.e. by C<host> and C<port>).
 
@@ -62,7 +63,7 @@ is part of the HTTP response from the pinged InfluxDB instance.
     my $ping = $influx->ping();
     print $ping->version if ($ping);
 
-=head2 query query, database => "DATABASE", chunk_size => CHUNK_SIZE, epoch => "ns"
+=head2 query(query, database=>"DATABASE", chunk_size=>CHUNK_SIZE, epoch=>"ns")
 
 Used to query the InfluxDB instance. All parameters but the first one are optional. The
 C<query> parameter can either be a String or a Perl ArrayRef of Strings, where every String
@@ -74,20 +75,25 @@ hash. Additionally the attribute C<request_id> provides the request identifier a
 the HTTP reponse headers by InfluxDB. This can for example be useful for correlating
 requests with log files.
 
-=head2 write measurement, database => "DATABASE", precision => "ns", retention_policy => "RP"
+=head2 write(data, database=>"DATABASE", precision=>"ns", retention_policy=>"RP", measurement=>"foo", tag_fields=>("tag1", ...))
 
-Writes data into InfluxDB. The parameter C<measurement> can either be a String or an
-ArrayRef of Strings, where each String contains one valid InfluxDB LineProtocol
-statement. All of those mesaurements are then sent to InfluxDB and the specified
-database. The returned object evaluates to true if the write was successful, and otherwise
-to false.
+Writes data into InfluxDB. The 1ˢᵗ parameter C<data> can either be a String or an
+ArrayRef of Strings or Hashes, where each String contains one valid InfluxDB LineProtocol
+statement and each Hash represents a point. All of those mesaurements are then sent to 
+InfluxDB and the specified database. The returned object evaluates to true if the 
+write was successful, and otherwise to false.
 
-The optional argument precision can be given if a precsion different than "ns" is used in
+The optional argument "C<precision>" can be given if a precsion different than "ns" is used in
 the line protocol. InfluxDB docs suggest that using a coarser precision than ns can save
 space and processing. In many cases "s" or "m" might do.
 
-The optional argument retention_policy can be used to specify a retention policy other than
+The optional argument "C<retention_policy>" can be used to specify a retention policy other than
 the default retention policy of the selected database.
+
+The optional argument "C<measurement>" is required if the 1ˢᵗ parameter C<data> is an ArrayRef 
+and contains elements other than Strings.
+
+The optional argument "C<tag_fields>" specifies which field(s) will be stored as tag(s).
 
 =head2 get_lwp_useragent
 
@@ -96,7 +102,7 @@ Returns the internally used LWP::UserAgent instance for possible modifications
 
 =head1 AUTHOR
 
-Raphael Seebacher, C<< <raphael@seebachers.ch> >>
+Raphael Seebacher, C<< <raphael@seebachers.ch> >>, modificada por sam80180 C<< <https://github.com/sam80180/InfluxDB-HTTP> >>
 
 =head1 BUGS
 
