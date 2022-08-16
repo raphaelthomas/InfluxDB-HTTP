@@ -71,7 +71,7 @@ contains a valid InfluxDB query.
 If the returned object evaluates to true, indicating that the query was successful, then
 the returned object's C<data> attribute contains the entire response from InfluxDB as Perl
 hash. Additionally the attribute C<request_id> provides the request identifier as set in
-the HTTP reponse headers by InfluxDB. This can for example be useful for correlating
+the HTTP response headers by InfluxDB. This can for example be useful for correlating
 requests with log files.
 
 =head2 write measurement, database => "DATABASE", precision => "ns", retention_policy => "RP"
