@@ -24,6 +24,7 @@ BEGIN {
 }
 
 const my $PORT          => 17755;
+const my $RPCPORT       => 17756;
 const my $TMPDIR_HANDLE => File::Temp->newdir(CLEANUP => 1);
 const my $TMPDIR        => $TMPDIR_HANDLE->dirname();
 
@@ -169,6 +170,7 @@ sub test_argument_checking {
 sub get_test_conf {
     return <<"END";
 reporting-disabled = true
+bind-address = ":$RPCPORT"
 
 [logging]
   level = "warn"
